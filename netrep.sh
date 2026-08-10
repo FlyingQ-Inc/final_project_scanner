@@ -66,7 +66,11 @@ main() {
     write_recs_section >> "$REPORT_FILE"
     write_footer >> "$REPORT_FILE"
 
+<<<<<<< HEAD
     echo "Scan completed successfully."
+=======
+    echo "Scan completed."
+>>>>>>> 366f0029ea6cffa81b2c68d0231422ab7302be21
     echo "Report created: $REPORT_FILE"
 }
 
