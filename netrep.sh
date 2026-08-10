@@ -1,24 +1,26 @@
 #!/bin/bash
 
 write_header() {
-    local target="$1"
+    local TARGET="$1"
 
     echo "============================================================"
     echo "                NETWORK SECURITY SCAN REPORT"
     echo "============================================================"
     echo
-    echo "Target IP Address/Hostname: $target"
+    echo "Target IP Address/Hostname: $TARGET"
     echo "Report Generated: $(date '+%Y-%m-%d %H:%M:%S')"
     echo
 }
 
 write_ports_section() {
+    local TARGET="$1"
+
     echo "------------------------------------------------------------"
     echo "OPEN PORTS AND DETECTED SERVICES"
     echo "------------------------------------------------------------"
-    echo "Port 22/tcp  - ssh"
-    echo "Port 80/tcp  - http"
-    echo "Port 443/tcp - https"
+
+    nmap -sV "$TARGET" | grep "open"
+
     echo
 }
 
@@ -27,7 +29,7 @@ write_vulns_section() {
     echo "POTENTIAL VULNERABILITIES IDENTIFIED"
     echo "------------------------------------------------------------"
     echo "CVE-2023-XXXX       - Outdated web server software"
-    echo "Default Credentials - FTP server may use default credentials"
+    echo "Default Credentials - Server may use default credentials"
     echo "Weak Encryption     - Service may support outdated protocols"
     echo
 }
@@ -55,16 +57,17 @@ main() {
         exit 1
     fi
 
-    local target="$1"
+    local TARGET="$1"
     local REPORT_FILE="report.txt"
 
-    write_header "$target" > "$REPORT_FILE"
-    write_ports_section >> "$REPORT_FILE"
+    write_header "$TARGET" > "$REPORT_FILE"
+    write_ports_section "$TARGET" >> "$REPORT_FILE"
     write_vulns_section >> "$REPORT_FILE"
     write_recs_section >> "$REPORT_FILE"
     write_footer >> "$REPORT_FILE"
 
-    echo "Report successfully created: $REPORT_FILE"
+    echo "Scan completed successfully."
+    echo "Report created: $REPORT_FILE"
 }
 
 main "$@"

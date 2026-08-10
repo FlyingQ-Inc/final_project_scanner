@@ -2,21 +2,22 @@
                 NETWORK SECURITY SCAN REPORT
 ============================================================
 
-Target IP Address/Hostname: 192.168.1.1
-Report Generated: 2026-08-09 23:51:37
+Target IP Address/Hostname: scanme.nmap.org
+Report Generated: 2026-08-10 00:17:20
 
 ------------------------------------------------------------
 OPEN PORTS AND DETECTED SERVICES
 ------------------------------------------------------------
-Port 22/tcp  - ssh
-Port 80/tcp  - http
-Port 443/tcp - https
+22/tcp    open  ssh        OpenSSH 6.6.1p1 Ubuntu 2ubuntu2.13 (Ubuntu Linux; protocol 2.0)
+80/tcp    open  http       Apache httpd 2.4.7 ((Ubuntu))
+9929/tcp  open  nping-echo Nping echo
+31337/tcp open  tcpwrapped
 
 ------------------------------------------------------------
 POTENTIAL VULNERABILITIES IDENTIFIED
 ------------------------------------------------------------
 CVE-2023-XXXX       - Outdated web server software
-Default Credentials - FTP server may use default credentials
+Default Credentials - Server may use default credentials
 Weak Encryption     - Service may support outdated protocols
 
 ------------------------------------------------------------
