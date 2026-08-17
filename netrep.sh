@@ -1,4 +1,10 @@
+cat > netrep.sh <<'EOF'
 #!/bin/bash
+
+run_scan() {
+    local TARGET="$1"
+    nmap -sV --script vuln "$TARGET"
+}
 
 write_header() {
     local TARGET="$1"
@@ -13,24 +19,69 @@ write_header() {
 }
 
 write_ports_section() {
-    local TARGET="$1"
+    local SCAN_RESULTS="$1"
 
     echo "------------------------------------------------------------"
     echo "OPEN PORTS AND DETECTED SERVICES"
     echo "------------------------------------------------------------"
 
-    nmap -sV "$TARGET" | grep "open"
+    echo "$SCAN_RESULTS" |
+        grep -E '^[0-9]+/(tcp|udp)[[:space:]]+open'
 
     echo
 }
 
 write_vulns_section() {
+    local SCAN_RESULTS="$1"
+    local VERSION_MATCH_FOUND="false"
+
     echo "------------------------------------------------------------"
     echo "POTENTIAL VULNERABILITIES IDENTIFIED"
     echo "------------------------------------------------------------"
-    echo "CVE-2023-XXXX       - Outdated web server software"
-    echo "Default Credentials - Server may use default credentials"
-    echo "Weak Encryption     - Service may support outdated protocols"
+
+    echo "High-Confidence NSE Results:"
+    echo
+
+    if echo "$SCAN_RESULTS" | grep -q "VULNERABLE"; then
+        echo "$SCAN_RESULTS" | grep "VULNERABLE"
+    else
+        echo "No high-confidence NSE vulnerabilities were reported."
+    fi
+
+    echo
+    echo "Service Version Analysis:"
+    echo
+
+    while IFS= read -r line; do
+        case "$line" in
+            *"vsftpd 2.3.4"*)
+                echo "[!!] VULNERABILITY DETECTED: vsftpd 2.3.4 contains a known critical backdoor."
+                VERSION_MATCH_FOUND="true"
+                ;;
+
+            *"Apache httpd 2.4.49"*)
+                echo "[!!] VULNERABILITY DETECTED: Apache 2.4.49 may be vulnerable to path traversal."
+                echo "     Related vulnerability: CVE-2021-41773"
+                VERSION_MATCH_FOUND="true"
+                ;;
+
+            *"ProFTPD 1.3.5"*)
+                echo "[!!] VULNERABILITY DETECTED: ProFTPD 1.3.5 may be vulnerable through its mod_copy module."
+                echo "     Related vulnerability: CVE-2015-3306"
+                VERSION_MATCH_FOUND="true"
+                ;;
+
+            *"UnrealIRCd 3.2.8.1"*)
+                echo "[!!] VULNERABILITY DETECTED: UnrealIRCd 3.2.8.1 may contain a known backdoor."
+                VERSION_MATCH_FOUND="true"
+                ;;
+        esac
+    done <<< "$SCAN_RESULTS"
+
+    if [ "$VERSION_MATCH_FOUND" = "false" ]; then
+        echo "No manually configured vulnerable service versions were detected."
+    fi
+
     echo
 }
 
@@ -39,9 +90,10 @@ write_recs_section() {
     echo "RECOMMENDATIONS FOR REMEDIATION"
     echo "------------------------------------------------------------"
     echo "1. Update all software and services to the latest versions."
-    echo "2. Change all default credentials immediately."
-    echo "3. Implement and properly configure a firewall."
-    echo "4. Disable unnecessary ports and services."
+    echo "2. Investigate all vulnerabilities reported by NSE."
+    echo "3. Change all default credentials immediately."
+    echo "4. Implement and properly configure a firewall."
+    echo "5. Disable unnecessary ports and services."
     echo
 }
 
@@ -57,21 +109,37 @@ main() {
         exit 1
     fi
 
+    if ! command -v nmap >/dev/null 2>&1; then
+        echo "Error: nmap is not installed." >&2
+        exit 1
+    fi
+
     local TARGET="$1"
     local REPORT_FILE="report.txt"
+    local SCAN_RESULTS
+    local SCAN_STATUS
+
+    echo "Scanning $TARGET..."
+    echo "The vulnerability scan may take several minutes."
+
+    SCAN_RESULTS=$(run_scan "$TARGET" 2>&1)
+    SCAN_STATUS=$?
+
+    if [ "$SCAN_STATUS" -ne 0 ]; then
+        echo "Error: The Nmap scan failed." >&2
+        echo "$SCAN_RESULTS" >&2
+        exit 1
+    fi
 
     write_header "$TARGET" > "$REPORT_FILE"
-    write_ports_section "$TARGET" >> "$REPORT_FILE"
-    write_vulns_section >> "$REPORT_FILE"
+    write_ports_section "$SCAN_RESULTS" >> "$REPORT_FILE"
+    write_vulns_section "$SCAN_RESULTS" >> "$REPORT_FILE"
     write_recs_section >> "$REPORT_FILE"
     write_footer >> "$REPORT_FILE"
 
-<<<<<<< HEAD
-    echo "Scan completed successfully."
-=======
     echo "Scan completed."
->>>>>>> 366f0029ea6cffa81b2c68d0231422ab7302be21
     echo "Report created: $REPORT_FILE"
 }
 
 main "$@"
+EOF
