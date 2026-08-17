@@ -1,4 +1,3 @@
-cat > netrep.sh <<'EOF'
 #!/bin/bash
 
 run_scan() {
