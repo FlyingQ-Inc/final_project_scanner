@@ -1,38 +1,86 @@
-============================================================
-                NETWORK SECURITY SCAN REPORT
-============================================================
-
+================================================================
+                 NETWORK SECURITY SCAN REPORT
+================================================================
 Target IP Address/Hostname: scanme.nmap.org
-Report Generated: 2026-08-17 01:01:50
+Report Generated: 2026-08-22 23:40:48 UTC
+Nmap Command: nmap -sV --script vuln --script-timeout 30s --host-timeout 10m --reason scanme.nmap.org 
 
-------------------------------------------------------------
-OPEN PORTS AND DETECTED SERVICES
-------------------------------------------------------------
-22/tcp    open  ssh        OpenSSH 6.6.1p1 Ubuntu 2ubuntu2.13 (Ubuntu Linux; protocol 2.0)
-80/tcp    open  http       Apache httpd 2.4.7 ((Ubuntu))
-9929/tcp  open  nping-echo Nping echo
-31337/tcp open  tcpwrapped
+--- EXECUTIVE SUMMARY ---
+Open ports: 4
+Total findings: 7
+Severity totals: CRITICAL=0 HIGH=2 MEDIUM=4 LOW=1 UNKNOWN=0
 
-------------------------------------------------------------
-POTENTIAL VULNERABILITIES IDENTIFIED
-------------------------------------------------------------
-High-Confidence NSE Results:
+--- OPEN PORTS AND DETECTED SERVICES ---
+22/tcp    open  ssh        syn-ack OpenSSH 6.6.1p1 Ubuntu 2ubuntu2.13 (Ubuntu Linux; protocol 2.0)
+80/tcp    open  http       syn-ack Apache httpd 2.4.7 ((Ubuntu))
+9929/tcp  open  nping-echo syn-ack Nping echo
+31337/tcp open  tcpwrapped syn-ack
 
-No high-confidence NSE vulnerabilities were reported.
+--- POTENTIAL VULNERABILITIES IDENTIFIED ---
 
-Service Version Analysis:
+Finding 1: EXPOSURE-22/tcp
+  Severity: LOW
+  Affected service: 22/tcp ssh
+  Description: SSH is remotely accessible and should be hardened.
+  Detection source: Service exposure analysis
+  Reference: N/A
 
-No manually configured vulnerable service versions were detected.
+Finding 2: EXPOSURE-80/tcp
+  Severity: MEDIUM
+  Affected service: 80/tcp http
+  Description: Unencrypted HTTP can expose sessions or application data.
+  Detection source: Service exposure analysis
+  Reference: N/A
 
-------------------------------------------------------------
-RECOMMENDATIONS FOR REMEDIATION
-------------------------------------------------------------
-1. Update all software and services to the latest versions.
-2. Investigate all vulnerabilities reported by NSE.
-3. Change all default credentials immediately.
-4. Implement and properly configure a firewall.
-5. Disable unnecessary ports and services.
+Finding 3: CVE-2016-6210
+  Severity: MEDIUM
+  Affected service: 22/tcp OpenSSH 6.6
+  Description: Older OpenSSH versions may disclose usernames through authentication timing.
+  Detection source: Local version rule
+  Reference: https://nvd.nist.gov/vuln/detail/CVE-2016-6210
 
-============================================================
-                         END OF REPORT
-============================================================
+Finding 4: CVE-2018-15473
+  Severity: MEDIUM
+  Affected service: 22/tcp OpenSSH 6.6
+  Description: Affected OpenSSH versions may allow remote username enumeration.
+  Detection source: Local version rule
+  Reference: https://nvd.nist.gov/vuln/detail/CVE-2018-15473
+
+Finding 5: CVE-2021-40438
+  Severity: HIGH
+  Affected service: 80/tcp Apache 2.4.7
+  Description: Affected Apache mod_proxy configurations may permit server-side request forgery.
+  Detection source: Local version rule
+  Reference: https://nvd.nist.gov/vuln/detail/CVE-2021-40438
+
+Finding 6: CVE-2021-44224
+  Severity: HIGH
+  Affected service: Apache HTTP Server 2.4.7
+  Description: A crafted URI sent to httpd configured as a forward proxy (ProxyRequests on) can cause a crash (NULL pointer dereference) or, for configurations mixing forward and reverse proxy declarations, can allow for requests to be directed to a declared Unix Domain Socket endpoint (Server Side Request Forgery). This issue affects Apache HTTP Server 2.4.7 up to 2.4.51 (included).
+  Detection source: NIST NVD API keyword search
+  Reference: https://nvd.nist.gov/vuln/detail/CVE-2021-44224
+
+Finding 7: CVE-2025-66200
+  Severity: MEDIUM
+  Affected service: Apache HTTP Server 2.4.7
+  Description: mod_userdir+suexec bypass via AllowOverride FileInfo vulnerability in Apache HTTP Server. Users with access to use the RequestHeader directive in htaccess can cause some CGI scripts to run under an unexpected userid. This issue affects Apache HTTP Server: from 2.4.7 through 2.4.65. Users are recommended to upgrade to version 2.4.66, which fixes the issue.
+  Detection source: NIST NVD API keyword search
+  Reference: https://nvd.nist.gov/vuln/detail/CVE-2025-66200
+
+--- NVD API LOOKUP STATUS ---
+NVD found no keyword matches for OpenSSH 6.6.1p1.
+NVD queried successfully for Apache HTTP Server 2.4.7.
+
+--- RECOMMENDATIONS FOR REMEDIATION ---
+1. Restrict SSH to approved addresses, disable root login, and require key authentication.
+2. Enable HTTPS, redirect HTTP to TLS, and apply secure web-server settings.
+3. Upgrade OpenSSH 6.6 to a supported vendor-patched release.
+4. Upgrade OpenSSH beyond 7.7 or install the distribution's patched package.
+5. Upgrade Apache 2.4.7 to a supported release, at least 2.4.53, and review mod_proxy.
+6. Validate CVE-2021-44224 against the installed Apache HTTP Server package and upgrade to a supported patched version.
+7. Validate CVE-2025-66200 against the installed Apache HTTP Server package and upgrade to a supported patched version.
+
+Version and NVD keyword matches are potential findings that require verification.
+This product uses data from the NVD API but is not endorsed or certified by the NVD.
+
+========================= END OF REPORT =========================
