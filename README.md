@@ -250,3 +250,18 @@ This product uses data from the NVD API but is not endorsed or certified by the 
 Caleb Quisenberry
 
 NTS370 Final Project
+
+## UAT Boards Portfolio Evidence
+
+This repository is a direct code artifact for **NTS370: Shell Scripting for Technologists**. It is proposed as primary evidence for the **Network Security objective on scripting and automation**, with additional supporting value for security-tool evaluation and threat research.
+
+### Evidence to inspect
+- [Scanner source](netscan.sh), including argument validation, Nmap integration, report generation, and optional NVD lookups
+- [Example report](report.txt), showing scan output and identified potential risks
+- This README for the workflow, dependencies, options, and limitations
+
+### Interpreting the results
+Open services, local version matches, Nmap script findings, and NVD keyword matches are **indicators for follow-up**, not proof that a target is exploitable. Version detection can be imprecise, backported fixes may be present, and CVEs can depend on specific configurations. Findings should be verified before operational remediation decisions.
+
+### Project scope
+This is an educational security assessment utility intended only for systems the operator owns or is explicitly authorized to assess. The example output is a historical result, not a current assessment of its target.
